@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 const selectedProduct = {
 	name: 'Stylish Jacket',
@@ -23,9 +24,9 @@ const selectedProduct = {
 };
 
 const ProductDetails = () => {
-	const [mainImage, setMainImage] = useState('');
-	const [selectedSize, setSelectedSize] = useState('');
-	const [selectedColor, setSelectedColor] = useState('');
+	const [mainImage, setMainImage] = useState(null);
+	const [selectedSize, setSelectedSize] = useState(null);
+	const [selectedColor, setSelectedColor] = useState(null);
 	const [quantity, setQuantity] = useState(1);
 	const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
@@ -34,6 +35,37 @@ const ProductDetails = () => {
 			setMainImage(selectedProduct.images[0].url);
 		}
 	}, [selectedProduct]);
+
+	const handleSetQuantity = (type) => {
+		if (type === 'plus') {
+			setQuantity((prev) => {
+				return prev + 1;
+			});
+		}
+		if (type === 'minus') {
+			setQuantity((prev) => {
+				return prev > 1 ? prev - 1 : 1;
+			});
+		}
+	};
+
+	const handleAddToCart = () => {
+		if (!selectedSize || !selectedColor) {
+			toast.error('Please select size and color before ad	ding to cart', {
+				duration: 1000,
+			});
+			return;
+		}
+
+		setIsButtonDisabled(true);
+
+		setTimeout(() => {
+			toast.success('Product added to cart successfully!', {
+				duration: 1000,
+			});
+			setIsButtonDisabled(false);
+		}, 500);
+	};
 
 	return (
 		<div className="p-6">
@@ -89,6 +121,8 @@ const ProductDetails = () => {
 							{selectedProduct.price}
 						</p>
 						<p className="text-gray-600 mb-4">{selectedProduct.description}</p>
+
+						{/* Color Section */}
 						<div className="mb-4">
 							<p className="text-gray-700">Color:</p>
 							<div className="flex gap-2 mt-2">
@@ -106,6 +140,7 @@ const ProductDetails = () => {
 							</div>
 						</div>
 
+						{/* Size Section */}
 						<div className="mb-4">
 							<p className="text-gray-700">Size:</p>
 							<div className="flex gap-2 mt-2">
@@ -121,29 +156,36 @@ const ProductDetails = () => {
 							</div>
 						</div>
 
+						{/* Quantity Section */}
 						<div className="mb-6">
 							<p className="text-gray-700">Quantity:</p>
 							<div className="flex items-center space-x-4 mt-2">
 								<button
 									className="px-2 py-1 bg-gray-200 rounded text-lg"
-									onClick={() => setQuantity(Math.max(1, quantity - 1))}
+									onClick={() => handleSetQuantity('minus')}
 								>
 									-
 								</button>
 								<span className="text-lg">{quantity}</span>
 								<button
 									className="px-2 py-1 bg-gray-200 rounded text-lg"
-									onClick={() => setQuantity(quantity + 1)}
+									onClick={() => handleSetQuantity('plus')}
 								>
 									+
 								</button>
 							</div>
 						</div>
 
-						<button className="bg-black text-white py-2 px-6 rounded w-full mb-4">
-							Add To Cart
+						{/* Add To Card Button */}
+						<button
+							onClick={() => handleAddToCart()}
+							disabled={isButtonDisabled}
+							className="bg-black text-white py-2 px-6 rounded w-full mb-4"
+						>
+							{isButtonDisabled ? 'Adding...' : 'Add To Cart'}
 						</button>
 
+						{/* Characteristics Section */}
 						<div className="mt-10 text-gray-700">
 							<h3 className="text-xl font-bold mb-4">Characteristics:</h3>
 							<table className="w-full text-left text-sm text-gray-600">
