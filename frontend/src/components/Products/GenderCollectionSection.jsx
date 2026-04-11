@@ -14,7 +14,7 @@ const GenderCollectionSection = () => {
 						alt="Women's Collection"
 						className="rounded-tl-4xl w-full h-[700px] object-cover"
 					/>
-					<div className="absolute bottom-8 left-8 bg-white bg-opacity-90 p-4">
+					<div className="hover:bg-gray-200 transition-all duration-300 absolute bottom-8 left-8 bg-white bg-opacity-90 p-4">
 						<h2 className="text-2xl font-bold text-gray-900 mb-3">
 							Women's Collection
 						</h2>
@@ -34,7 +34,7 @@ const GenderCollectionSection = () => {
 						alt="Men's Collection"
 						className="w-full rounded-br-4xl h-[700px] object-cover"
 					/>
-					<div className="absolute bottom-8 left-8 bg-white bg-opacity-90 p-4">
+					<div className="hover:bg-gray-200 transition-all duration-300 absolute bottom-8 left-8 bg-white bg-opacity-90 p-4">
 						<h2 className="text-2xl font-bold text-gray-900 mb-3">
 							Men's Collection
 						</h2>
