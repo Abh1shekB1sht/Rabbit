@@ -128,7 +128,9 @@ const NewArrivals = () => {
 		setIsDragging(false);
 	};
 
-	const handleMouseLeave = (e) => {};
+	const handleMouseLeave = (e) => {
+		setIsDragging(false);
+	};
 
 	// function to handle scroll button clicks
 	const scroll = (direction) => {
