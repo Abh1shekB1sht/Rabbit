@@ -32,7 +32,7 @@ const NewArrivals = () => {
 			],
 		},
 		{
-			_id: '1',
+			_id: '2',
 			name: 'Stylish Jacket',
 			price: 120,
 			image: [
@@ -43,7 +43,7 @@ const NewArrivals = () => {
 			],
 		},
 		{
-			_id: '1',
+			_id: '3',
 			name: 'Stylish Jacket',
 			price: 120,
 			image: [
@@ -54,7 +54,7 @@ const NewArrivals = () => {
 			],
 		},
 		{
-			_id: '1',
+			_id: '4',
 			name: 'Stylish Jacket',
 			price: 120,
 			image: [
@@ -65,7 +65,7 @@ const NewArrivals = () => {
 			],
 		},
 		{
-			_id: '1',
+			_id: '5',
 			name: 'Stylish Jacket',
 			price: 120,
 			image: [
@@ -76,7 +76,7 @@ const NewArrivals = () => {
 			],
 		},
 		{
-			_id: '1',
+			_id: '6',
 			name: 'Stylish Jacket',
 			price: 120,
 			image: [
@@ -87,7 +87,7 @@ const NewArrivals = () => {
 			],
 		},
 		{
-			_id: '1',
+			_id: '7',
 			name: 'Stylish Jacket',
 			price: 120,
 			image: [
@@ -98,7 +98,7 @@ const NewArrivals = () => {
 			],
 		},
 		{
-			_id: '1',
+			_id: '8',
 			name: 'Stylish Jacket',
 			price: 120,
 			image: [
@@ -150,12 +150,12 @@ const NewArrivals = () => {
 			setCanScrollRight(rightScrollable);
 		}
 
-		console.log({
-			leftScroll: container.scrollLeft,
-			containerScrollWidth: container.scrollWidth,
-			clientWidth: container.clientWidth,
-			offsetLeft: scrollRef.current.offsetLeft,
-		});
+		// console.log({
+		// 	leftScroll: container.scrollLeft,
+		// 	containerScrollWidth: container.scrollWidth,
+		// 	clientWidth: container.clientWidth,
+		// 	offsetLeft: scrollRef.current.offsetLeft,
+		// });
 	};
 
 	// add scroll event listener to update button visibility
