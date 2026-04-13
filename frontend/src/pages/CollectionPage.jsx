@@ -14,8 +14,8 @@ const CollectionPage = () => {
 	};
 
 	const handleClickOutside = (e) => {
-		// CLose sidebar if clicked outside of it
-		if (sidebarRef.current && !sidebarRef.current.contain(e.target)) {
+		// Close sidebar if clicked outside of it
+		if (sidebarRef.current && !sidebarRef.current.contains(e.target)) {
 			setIsSidebarOpen(false);
 		}
 	};
@@ -24,8 +24,10 @@ const CollectionPage = () => {
 		// Add Event listener for clicks
 		document.addEventListener('mousedown', handleClickOutside);
 		// Clean event listener
-		document.removeEventListener('mousedown', handleClickOutside);
-	});
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, []);
 
 	useEffect(() => {
 		setTimeout(() => {
@@ -128,7 +130,7 @@ const CollectionPage = () => {
 			{/* Filter Sidebar */}
 			<div
 				ref={sidebarRef}
-				className={`${isSidebarOpen ? '-translate-x-full' : 'translate-x-0'} fixed inset-y-0 z-50 left-0 w-64 bg-white overflow-y-auto transition-transform duration-300 lg:static lg:translate-x-0`}
+				className={`${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed inset-y-0 z-50 left-0 w-64 bg-white overflow-y-auto transition-transform duration-300 lg:static lg:translate-x-0`}
 			>
 				<FilterSidebar />
 			</div>
