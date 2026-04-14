@@ -46,7 +46,8 @@ const CheckOut = () => {
 	const handleRazorpayPayment = async () => {
 		setIsProcessing(true);
 
-		const isLoaded = await UseRazorpay();
+		const { loadScript } = UseRazorpay();
+		const isLoaded = await loadScript();
 		if (!isLoaded) {
 			alert('Failed to load Razorpay. Check your internet connection.');
 			setIsProcessing(false);
@@ -54,8 +55,8 @@ const CheckOut = () => {
 		}
 
 		const options = {
-			key: 'rzp_test_Sd0bpPlvPsxtw7',
-			amount: cart.totalPrice * 100, // ✅ paise, dynamic
+			key: import.meta.env.VITE_RAZORPAY_CLIENT_ID,
+			amount: cart.totalPrice * 100,
 			currency: 'INR',
 			name: 'Rabbit',
 			description: 'Order Payment',
@@ -72,6 +73,7 @@ const CheckOut = () => {
 				});
 				setPaymentStatus('success');
 				setIsProcessing(false);
+				navigate('/order-confirmation');
 			},
 			modal: {
 				ondismiss: function () {
