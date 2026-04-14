@@ -1,13 +1,16 @@
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
+import AdminLayout from './components/Admin/AdminLayout';
 import CheckOut from './components/Cart/CheckOut';
 import UserLayout from './components/Layout/UserLayout';
 import ProductDetails from './components/Products/ProductDetails';
 import CollectionPage from './pages/CollectionPage';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import MyOrdersPage from './pages/MyOrdersPage';
 import OrderConfirmation from './pages/OrderConfirmation';
+import OrderDetailsPage from './pages/OrderDetailsPage';
 import Profile from './pages/Profile';
 import Register from './pages/Register';
 
@@ -25,7 +28,10 @@ const App = () => {
 					<Route path="/product/:id" element={<ProductDetails />} />
 					<Route path="/checkout" element={<CheckOut />} />
 					<Route path="/order-confirmation" element={<OrderConfirmation />} />
+					<Route path="/order/:id" element={<OrderDetailsPage />} />
+					<Route path="/my-orders" element={<MyOrdersPage />}></Route>
 				</Route>
+				<Route path="/admin" element={<AdminLayout />}></Route>
 			</Routes>
 		</BrowserRouter>
 	);
