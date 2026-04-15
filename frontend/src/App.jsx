@@ -1,7 +1,9 @@
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
+import AdminHomePage from './components/Admin/AdminHomePage';
 import AdminLayout from './components/Admin/AdminLayout';
+import UserManagement from './components/Admin/UserManagement';
 import CheckOut from './components/Cart/CheckOut';
 import UserLayout from './components/Layout/UserLayout';
 import ProductDetails from './components/Products/ProductDetails';
@@ -29,9 +31,12 @@ const App = () => {
 					<Route path="/checkout" element={<CheckOut />} />
 					<Route path="/order-confirmation" element={<OrderConfirmation />} />
 					<Route path="/order/:id" element={<OrderDetailsPage />} />
-					<Route path="/my-orders" element={<MyOrdersPage />}></Route>
+					<Route path="/my-orders" element={<MyOrdersPage />} />
 				</Route>
-				<Route path="/admin" element={<AdminLayout />}></Route>
+				<Route path="/admin" element={<AdminLayout />}>
+					<Route index element={<AdminHomePage />} />
+					<Route path="users" element={<UserManagement />} />
+				</Route>
 			</Routes>
 		</BrowserRouter>
 	);
