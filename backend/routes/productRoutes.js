@@ -242,6 +242,18 @@ router.get('/', async (req, res) => {
 	}
 });
 
+// @route GET /api/products/best-seller
+// @desc Retrieve the product with the highest rating
+// @access Public
+router.get('/best-seller', async (req, res) => {
+	try {
+		res.send('this should work');
+	} catch (error) {
+		console.error('Error fetching best-seller:', error);
+		res.status(500).json({ message: 'Server error' });
+	}
+});
+
 // @route GET /api/products/:id
 // @desc Get a single product by ID
 // @access Public
@@ -249,21 +261,14 @@ router.get('/:id', async (req, res) => {
 	try {
 		const product = await Product.findById(req.params.id);
 		if (product) {
-			res.status(200).json(product);
+			return res.status(200).json(product);
 		} else {
-			console.error(error);
-			res.status(500).json({ message: 'Product not found' });
+			return res.status(404).json({ message: 'Product not found' });
 		}
-	} catch (error) {}
-});
-
-// @route GET /api/products/best-seller
-// @desc Retrieve the product with the highest rating
-// @access Public
-router.get('/best-seller', async (req, res) => {
-	try {
-		res.send('this should work');
-	} catch (error) {}
+	} catch (error) {
+		console.error('Error fetching product by ID:', error);
+		res.status(500).json({ message: 'Server error' });
+	}
 });
 
 // @route GET /api/products/similar/:id
