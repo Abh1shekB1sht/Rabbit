@@ -247,10 +247,32 @@ router.get('/', async (req, res) => {
 // @access Public
 router.get('/best-seller', async (req, res) => {
 	try {
-		res.send('this should work');
+		const bestSeller = await Product.findOne().sort({ rating: -1 });
+		if (bestSeller) {
+			res.status(200).json(bestSeller);
+		} else {
+			res.status(404).json({ message: 'No products found' });
+		}
 	} catch (error) {
-		console.error('Error fetching best-seller:', error);
-		res.status(500).json({ message: 'Server error' });
+		console.error(error);
+		res
+			.status(500)
+			.json({ message: 'Server error while fetching best seller' });
+	}
+});
+
+// @route GET /api/products/new-arrivals
+// @desc Retrieve the 5 most recently added products
+// @access Public
+router.get('/new-arrivals', async (req, res) => {
+	try {
+		const newArrivals = await Product.find().sort({ createdAt: -1 }).limit(5);
+		res.status(200).json(newArrivals);
+	} catch (error) {
+		console.error(error);
+		res
+			.status(500)
+			.json({ message: 'Server error while fetching new arrivals' });
 	}
 });
 
