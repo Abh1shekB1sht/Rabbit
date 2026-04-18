@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const userRoute = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
+const cartRoutes = require('./routes/cartRoutes');
 
 const app = express();
 app.use(cors());
@@ -21,6 +22,7 @@ app.get('/', (req, res) => {
 // API Routes
 app.use('/api/users', userRoute);
 app.use('/api/products', productRoutes);
+app.use('/api/cart', cartRoutes);
 
 const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => {
