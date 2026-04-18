@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const userRoute = require('./routes/userRoutes');
+const productRoutes = require('./routes/productRoutes');
 
 const app = express();
 app.use(cors());
@@ -19,6 +20,7 @@ app.get('/', (req, res) => {
 
 // API Routes
 app.use('/api/users', userRoute);
+app.use('/api/products', productRoutes);
 
 app.listen(process.env.PORT, () => {
 	console.log('Server is running on port 9000');
