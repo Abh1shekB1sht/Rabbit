@@ -4,6 +4,7 @@ import { Toaster } from 'sonner';
 import AdminHomePage from './components/Admin/AdminHomePage';
 import AdminLayout from './components/Admin/AdminLayout';
 import EditProductPage from './components/Admin/EditProductPage';
+import OrderManagement from './components/Admin/OrderManagement';
 import ProductManagement from './components/Admin/ProductManagement';
 import UserManagement from './components/Admin/UserManagement';
 import CheckOut from './components/Cart/CheckOut';
@@ -40,6 +41,7 @@ const App = () => {
 					<Route path="users" element={<UserManagement />} />
 					<Route path="products" element={<ProductManagement />} />
 					<Route path="products/:id/edit" element={<EditProductPage />} />
+					<Route path="orders" element={<OrderManagement />} />
 				</Route>
 			</Routes>
 		</BrowserRouter>
