@@ -23,9 +23,10 @@ const productSchema = new mongoose.Schema(
 			required: true,
 			default: 0,
 		},
-		SKU: {
+		sku: {
 			type: String,
 			unique: true,
+			sparse: true,
 			required: true,
 		},
 		category: {
