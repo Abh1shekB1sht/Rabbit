@@ -7,13 +7,16 @@ const router = express.Router();
 
 // Helper function to get or create a cart for a user or guest
 const getCart = async (userId, guestId) => {
+	// Prefer a user cart, but if none exists fall back to a guest cart
 	if (userId) {
-		return await Cart.findOne({ user: userId });
-	} else if (guestId) {
-		return await Cart.findOne({ guestId });
-	} else {
-		return null;
+		const userCart = await Cart.findOne({ user: userId });
+		if (userCart) return userCart;
 	}
+	if (guestId) {
+		const guestCart = await Cart.findOne({ guestId });
+		if (guestCart) return guestCart;
+	}
+	return null;
 };
 
 // @route POST /api/cart
@@ -101,7 +104,7 @@ router.put('/', async (req, res) => {
 		const productIndex = cart.products.findIndex(
 			(item) =>
 				item.productId.toString() === productId &&
-				items.size === size &&
+				item.size === size &&
 				item.color === color,
 		);
 		if (productIndex > -1) {
@@ -112,6 +115,37 @@ router.put('/', async (req, res) => {
 			}
 			cart.totalPrice = cart.products.reduce(
 				(acc, item) => acc + item.price * item.quantity,
+				0,
+			);
+			await cart.save();
+			return res.status(200).json(cart);
+		} else {
+			return res.status(404).json({ message: 'Product not found in cart' });
+		}
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: 'Server error' });
+	}
+});
+
+// @route DELETE /api/cart
+// @desc Remove a product from the cart
+// @access Public
+router.delete('/', async (req, res) => {
+	const { productId, size, color, guestId, userId } = req.body;
+	try {
+		let cart = await getCart(userId, guestId);
+		if (!cart) return res.status(404).json({ message: 'Cart not found' });
+		const productIndex = cart.products.findIndex(
+			(item) =>
+				item.productId.toString() === productId &&
+				item.size === size &&
+				item.color === color,
+		);
+		if (productIndex > -1) {
+			cart.products.splice(productIndex, 1);
+			cart.totalPrice = cart.products.reduce(
+				(acc, item) => acc + item.price * quantity,
 				0,
 			);
 			await cart.save();
