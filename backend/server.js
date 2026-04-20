@@ -26,7 +26,7 @@ app.use('/api/users', userRoute);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/checkout', checkoutRoutes);
-app.use('/api/order', orderRoutes);
+app.use('/api/orders', orderRoutes);
 
 const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => {
