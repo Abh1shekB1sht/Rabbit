@@ -1,7 +1,7 @@
 const express = require('express');
 const Checkout = require('../models/Checkout');
 const Cart = require('../models/Cart');
-const Product = require('../models/product');
+const Product = require('../models/Product');
 const Order = require('../models/Order');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -73,10 +73,21 @@ router.post('/:id/finalize', protect, async (req, res) => {
 			return res.status(404).json({ message: 'Checkout not found' });
 		}
 		if (checkout.isPaid && !checkout.isFinalized) {
+			// Map checkout items to order items, ensuring all required fields are present
+			const orderItems = checkout.checkoutItems.map((item) => ({
+				productId: item.productId,
+				name: item.name,
+				image: item.image,
+				price: item.price,
+				size: item.size || '',
+				color: item.color || '',
+				quantity: item.quantity,
+			}));
+
 			// Create final order based on the checkout details
 			const finalOrder = await Order.create({
 				user: checkout.user,
-				orderItems: checkout.checkoutItems,
+				orderItems: orderItems,
 				shippingAddress: checkout.shippingAddress,
 				paymentMethod: checkout.paymentMethod,
 				totalPrice: checkout.totalPrice,
