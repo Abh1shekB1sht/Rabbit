@@ -8,9 +8,9 @@ const loadCartFromLocalStorage = () => {
 };
 
 // Helper function to save cart to localStorage
-// const saveCartToStorage = (cart) => {
-// 	localStorage.setItem('cart', JSON.stringify(cart));
-// };
+const saveCartToStorage = (cart) => {
+	localStorage.setItem('cart', JSON.stringify(cart));
+};
 
 // Fetch cart from a user or guest
 export const fetchCart = createAsyncThunk(
@@ -149,6 +149,7 @@ const cartSlice = createSlice({
 			.addCase(fetchCart.fulfilled, (state, action) => {
 				state.loading = false;
 				state.error = action.payload;
+				saveCartToStorage(action.payload);
 			})
 			.addCase(fetchCart.rejected, (state, action) => {
 				state.loading = false;
@@ -161,6 +162,7 @@ const cartSlice = createSlice({
 			.addCase(addToCart.fulfilled, (state, action) => {
 				state.loading = false;
 				state.error = action.payload;
+				saveCartToStorage(action.payload);
 			})
 			.addCase(addToCart.rejected, (state, action) => {
 				state.loading = false;
@@ -173,6 +175,7 @@ const cartSlice = createSlice({
 			.addCase(updateCartItemQuantity.fulfilled, (state, action) => {
 				state.loading = false;
 				state.error = action.payload;
+				saveCartToStorage(action.payload);
 			})
 			.addCase(updateCartItemQuantity.rejected, (state, action) => {
 				state.loading = false;
@@ -186,6 +189,7 @@ const cartSlice = createSlice({
 			.addCase(removeFromCart.fulfilled, (state, action) => {
 				state.loading = false;
 				state.error = action.payload;
+				saveCartToStorage(action.payload);
 			})
 			.addCase(removeFromCart.rejected, (state, action) => {
 				state.loading = false;
@@ -198,6 +202,7 @@ const cartSlice = createSlice({
 			.addCase(mergeCart.fulfilled, (state, action) => {
 				state.loading = false;
 				state.error = action.payload;
+				saveCartToStorage(action.payload);
 			})
 			.addCase(mergeCart.rejected, (state, action) => {
 				state.loading = false;
