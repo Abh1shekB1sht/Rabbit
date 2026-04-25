@@ -17,41 +17,43 @@ router.post('/register', async (req, res) => {
 		});
 	}
 	try {
-		const existingUser = await User.findOne({ email });
+		const normalizedEmail = email.trim().toLowerCase();
+		const existingUser = await User.findOne({ email: normalizedEmail });
 		if (existingUser) {
 			return res
 				.status(400)
 				.json({ success: false, message: 'User already exists' });
 		}
-		const user = new User({ name, email, password });
+		const user = new User({ name, email: normalizedEmail, password });
 		await user.save();
 
 		// Create JWT Payload
-		const pyaload = { user: { _id: user._id, role: user.role } };
+		const payload = { user: { _id: user._id, role: user.role } };
 
-		// Sign and return the token along with user info
-		const token = jwt.sign(
-			pyaload,
-			process.env.JWT_SECRET,
-			{
-				expiresIn: '7d',
-			},
-			(err, token) => {
-				if (err) throw err;
+		const token = jwt.sign(payload, process.env.JWT_SECRET, {
+			expiresIn: '7d',
+		});
 
-				// Send the user and token in response
-				res.status(201).json({
-					user: {
-						_id: user._id,
-						name: user.name,
-						email: user.email,
-						role: user.role,
-					},
-				});
+		return res.status(201).json({
+			user: {
+				_id: user._id,
+				name: user.name,
+				email: user.email,
+				role: user.role,
 			},
-		);
+			token,
+		});
 	} catch (error) {
-		res.status(500).json({ message: error.message || 'Server error' });
+		if (error.code === 11000) {
+			return res.status(400).json({ message: 'User already exists' });
+		}
+		if (error.name === 'ValidationError') {
+			const firstMessage =
+				Object.values(error.errors || {})[0]?.message || 'Invalid user data';
+			return res.status(400).json({ message: firstMessage });
+		}
+
+		return res.status(500).json({ message: error.message || 'Server error' });
 	}
 });
 
@@ -61,8 +63,9 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
 	const { email, password } = req.body;
 	try {
+		const normalizedEmail = email?.trim().toLowerCase();
 		// Find the user by email
-		let user = await User.findOne({ email });
+		let user = await User.findOne({ email: normalizedEmail });
 		if (!user) {
 			return res.status(400).json({ message: 'Invalid Email or Password' });
 		}
@@ -72,30 +75,21 @@ router.post('/login', async (req, res) => {
 		}
 
 		// Create JWT Payload
-		const pyaload = { user: { _id: user._id, role: user.role } };
+		const payload = { user: { _id: user._id, role: user.role } };
 
-		// Sign and return the token along with user info
-		const token = jwt.sign(
-			pyaload,
-			process.env.JWT_SECRET,
-			{
-				expiresIn: '7d',
-			},
-			(err, token) => {
-				if (err) throw err;
+		const token = jwt.sign(payload, process.env.JWT_SECRET, {
+			expiresIn: '7d',
+		});
 
-				// Send the user and token in response
-				res.json({
-					user: {
-						_id: user._id,
-						name: user.name,
-						email: user.email,
-						role: user.role,
-					},
-					token,
-				});
+		return res.json({
+			user: {
+				_id: user._id,
+				name: user.name,
+				email: user.email,
+				role: user.role,
 			},
-		);
+			token,
+		});
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ message: error.message || 'Server error' });

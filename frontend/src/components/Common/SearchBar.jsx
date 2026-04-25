@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
 import { HiMagnifyingGlass, HiMiniXMark } from 'react-icons/hi2';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import {
+	fetchProductsByFilters,
+	setFilters,
+} from '../../redux/slices/productSlice';
 
 const SearchBar = () => {
 	// state for search input - empty by default
@@ -7,6 +13,9 @@ const SearchBar = () => {
 
 	// state for search visibility - closed by default
 	const [isOpen, setIsOpen] = useState(false);
+
+	const dispatch = useDispatch();
+	const navigate = useNavigate();
 
 	// toggle function to open/close the search dropdown
 	const handleSearchToggle = () => {
@@ -16,7 +25,9 @@ const SearchBar = () => {
 	// handle form submission - for now, log the search term.
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		console.log('Search Term : ', searchTerm);
+		dispatch(setFilters({ search: searchTerm }));
+		dispatch(fetchProductsByFilters({ search: searchTerm }));
+		navigate(`/collections/all?search=${searchTerm}`);
 		setIsOpen(false);
 	};
 
