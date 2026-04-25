@@ -170,12 +170,6 @@ In progress / planned polish:
 - stronger automated test coverage
 - deployment hardening and environment automation
 
-## Notes for contributors
-
-- Keep API responses consistent before adding new frontend screens.
-- If you change auth or cart behavior, test both guest and logged-in flows.
-- If you adjust product schema fields, update seeder data and admin forms together.
-
 ## Why this repo exists
 
 This project is my practical sandbox to understand real e-commerce behavior: auth edge cases, cart merge logic, checkout states, and admin workflows.
