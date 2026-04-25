@@ -110,6 +110,11 @@ export const mergeCart = createAsyncThunk(
 	'cart/mergeCart',
 	async ({ guestId, user }, { rejectWithValue }) => {
 		try {
+			const token = localStorage.getItem('userToken');
+			if (!token) {
+				return rejectWithValue({ message: 'Not authenticated' });
+			}
+
 			const response = await axios({
 				method: 'post',
 				url: `${import.meta.env.VITE_BACKEND_URL}/api/cart/merge`,
@@ -118,7 +123,7 @@ export const mergeCart = createAsyncThunk(
 					user,
 				},
 				headers: {
-					Authorization: `Bearer ${localStorage.getItem('userToken')}`,
+					Authorization: `Bearer ${token}`,
 				},
 			});
 			return response.data;
