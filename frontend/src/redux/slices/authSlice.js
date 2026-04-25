@@ -5,6 +5,11 @@ import axios from 'axios';
 const userFromStorage = localStorage.getItem('userInfo')
 	? JSON.parse(localStorage.getItem('userInfo'))
 	: null;
+const tokenFromStorage = localStorage.getItem('userToken');
+
+if (userFromStorage && !tokenFromStorage) {
+	localStorage.removeItem('userInfo');
+}
 
 // Check for an existing guest ID in the localStorage or generate a new one if it doesn't exist
 const initialGuestId =
@@ -13,7 +18,7 @@ localStorage.setItem('guestId', initialGuestId);
 
 // Initial state
 const initialState = {
-	user: userFromStorage,
+	user: tokenFromStorage ? userFromStorage : null,
 	guestId: initialGuestId,
 	loading: false,
 	error: null,
@@ -32,7 +37,11 @@ export const loginUser = createAsyncThunk(
 			localStorage.setItem('userToken', response.data.token);
 			return response.data.user; // Return the user object from the response
 		} catch (error) {
-			return rejectWithValue(error.response.data);
+			return rejectWithValue(
+				error.response?.data || {
+					message: 'Unable to login. Please try again.',
+				},
+			);
 		}
 	},
 );
@@ -50,7 +59,11 @@ export const registerUser = createAsyncThunk(
 			localStorage.setItem('userToken', response.data.token);
 			return response.data.user; // Return the user object from the response
 		} catch (error) {
-			return rejectWithValue(error.response.data);
+			return rejectWithValue(
+				error.response?.data || {
+					message: 'Unable to register. Please try again.',
+				},
+			);
 		}
 	},
 );
@@ -80,11 +93,12 @@ const authSlice = createSlice({
 			})
 			.addCase(loginUser.fulfilled, (state, action) => {
 				state.loading = false;
-				state.error = action.payload;
+				state.user = action.payload;
+				state.error = null;
 			})
 			.addCase(loginUser.rejected, (state, action) => {
 				state.loading = false;
-				state.error = action.payload.message;
+				state.error = action.payload?.message || 'Login failed';
 			})
 			.addCase(registerUser.pending, (state) => {
 				state.loading = true;
@@ -92,15 +106,16 @@ const authSlice = createSlice({
 			})
 			.addCase(registerUser.fulfilled, (state, action) => {
 				state.loading = false;
-				state.error = action.payload;
+				state.user = action.payload;
+				state.error = null;
 			})
 			.addCase(registerUser.rejected, (state, action) => {
 				state.loading = false;
-				state.error = action.payload.message;
+				state.error = action.payload?.message || 'Registration failed';
 			});
 	},
 });
 
-export const { logout, generateNewGusetId } = authSlice.actions;
+export const { logout, generateNewGuestId } = authSlice.actions;
 
 export default authSlice.reducer;
