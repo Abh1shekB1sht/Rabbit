@@ -50,7 +50,7 @@ router.post('/', async (req, res) => {
 				cart.products.push({
 					productId,
 					name: product.name,
-					image: product.image,
+					image: product.images?.[0]?.url || '',
 					price: product.price,
 					size,
 					color,
@@ -145,7 +145,7 @@ router.delete('/', async (req, res) => {
 		if (productIndex > -1) {
 			cart.products.splice(productIndex, 1);
 			cart.totalPrice = cart.products.reduce(
-				(acc, item) => acc + item.price * quantity,
+				(acc, item) => acc + item.price * item.quantity,
 				0,
 			);
 			await cart.save();
@@ -167,6 +167,41 @@ router.get('/', async (req, res) => {
 	try {
 		const cart = await getCart(userId, guestId);
 		if (cart) {
+			// Repair legacy cart items that were saved without an image URL.
+			const missingImageItems = cart.products.filter((item) => !item.image);
+			if (missingImageItems.length > 0) {
+				const productIds = [
+					...new Set(
+						missingImageItems.map((item) => item.productId.toString()),
+					),
+				];
+				const products = await Product.find({ _id: { $in: productIds } })
+					.select('_id images')
+					.lean();
+				const imageByProductId = new Map(
+					products.map((product) => [
+						product._id.toString(),
+						product.images?.[0]?.url || '',
+					]),
+				);
+
+				let cartUpdated = false;
+				cart.products.forEach((item) => {
+					if (!item.image) {
+						const imageUrl =
+							imageByProductId.get(item.productId.toString()) || '';
+						if (imageUrl) {
+							item.image = imageUrl;
+							cartUpdated = true;
+						}
+					}
+				});
+
+				if (cartUpdated) {
+					await cart.save();
+				}
+			}
+
 			res.json(cart);
 		} else {
 			res.status(404).json({ message: 'Cart not found' });
