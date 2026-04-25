@@ -34,7 +34,7 @@ export const fetchCart = createAsyncThunk(
 export const addToCart = createAsyncThunk(
 	'cart/addToCart',
 	async (
-		{ productId, quantity, size, guestId, userId },
+		{ productId, quantity, size, color, guestId, userId },
 		{ rejectWithValue },
 	) => {
 		try {
@@ -44,6 +44,7 @@ export const addToCart = createAsyncThunk(
 					productId,
 					quantity,
 					size,
+					color,
 					guestId,
 					userId,
 				},
@@ -59,14 +60,14 @@ export const addToCart = createAsyncThunk(
 export const updateCartItemQuantity = createAsyncThunk(
 	'cart/updateCartItemQuantity',
 	async (
-		{ cartItemId, quantity, guestId, userId, size, color },
+		{ productId, quantity, guestId, userId, size, color },
 		{ rejectWithValue },
 	) => {
 		try {
 			const response = await axios.put(
 				`${import.meta.env.VITE_BACKEND_URL}/api/cart`,
 				{
-					cartItemId,
+					productId,
 					quantity,
 					guestId,
 					userId,
@@ -148,7 +149,7 @@ const cartSlice = createSlice({
 			})
 			.addCase(fetchCart.fulfilled, (state, action) => {
 				state.loading = false;
-				state.error = action.payload;
+				state.cart = action.payload;
 				saveCartToStorage(action.payload);
 			})
 			.addCase(fetchCart.rejected, (state, action) => {
@@ -161,7 +162,7 @@ const cartSlice = createSlice({
 			})
 			.addCase(addToCart.fulfilled, (state, action) => {
 				state.loading = false;
-				state.error = action.payload;
+				state.cart = action.payload;
 				saveCartToStorage(action.payload);
 			})
 			.addCase(addToCart.rejected, (state, action) => {
@@ -174,7 +175,7 @@ const cartSlice = createSlice({
 			})
 			.addCase(updateCartItemQuantity.fulfilled, (state, action) => {
 				state.loading = false;
-				state.error = action.payload;
+				state.cart = action.payload;
 				saveCartToStorage(action.payload);
 			})
 			.addCase(updateCartItemQuantity.rejected, (state, action) => {
@@ -188,7 +189,7 @@ const cartSlice = createSlice({
 			})
 			.addCase(removeFromCart.fulfilled, (state, action) => {
 				state.loading = false;
-				state.error = action.payload;
+				state.cart = action.payload;
 				saveCartToStorage(action.payload);
 			})
 			.addCase(removeFromCart.rejected, (state, action) => {
@@ -201,7 +202,7 @@ const cartSlice = createSlice({
 			})
 			.addCase(mergeCart.fulfilled, (state, action) => {
 				state.loading = false;
-				state.error = action.payload;
+				state.cart = action.payload;
 				saveCartToStorage(action.payload);
 			})
 			.addCase(mergeCart.rejected, (state, action) => {
