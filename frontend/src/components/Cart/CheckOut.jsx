@@ -1,29 +1,13 @@
 import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import UseRazorpay from '../../hooks/UseRazorpay.js';
-
-const cart = {
-	products: [
-		{
-			name: 'Stylish Jacket',
-			size: 'M',
-			color: 'Black',
-			price: 120,
-			image: 'https://picsum.photos/150?random=1',
-		},
-		{
-			name: 'Casual Sneakers',
-			size: '42',
-			color: 'White',
-			price: 75,
-			image: 'https://picsum.photos/150?random=2',
-		},
-	],
-	totalPrice: 195,
-};
+import { createOrder } from '../../redux/actions/orderActions.js';
 
 const CheckOut = () => {
 	const navigate = useNavigate();
+	const dipatch = useDispatch();
+	const { cart, loading, error } = useSelector((state) => state.cart);
 	const [checkoutId, setCheckoutId] = useState(null);
 	const [paymentStatus, setPaymentStatus] = useState(null);
 	const [isProcessing, setIsProcessing] = useState(false);
@@ -38,9 +22,26 @@ const CheckOut = () => {
 		phone: '',
 	});
 
+	// Ensure cart is loading before proceeding
+	useEffect(() => {
+		if (!cart || !cart.products || cart.prorducts.length === 0) {
+			navigate('/cart');
+		}
+	}, [cart, navigate]);
+
 	const handleCreateCheckout = (e) => {
 		e.preventDefault();
-		setCheckoutId('mock-checkout-id-123');
+		if (cart && cart.products.length > 0) {
+			const res = dispatch(createCheckout({
+				checkoutItems: cart.products,
+				shippingAddress,
+				paymentMethod: 'Razorpay',
+				totalPrice: cart.totalPrice,
+			})
+		);
+		if (res.payload && res.payload._id) {
+			setCheckoutId(res.payload._id);
+		}
 	};
 
 	const handleRazorpayPayment = async () => {
