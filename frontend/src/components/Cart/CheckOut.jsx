@@ -100,9 +100,13 @@ const CheckOut = () => {
 			return;
 		}
 
+		const amountValue =
+			Number((checkout && checkout.totalPrice) || cart.totalPrice) || 0;
+		const amountInPaise = Math.round(amountValue * 100); // ensure integer paise value
+
 		const options = {
 			key: import.meta.env.VITE_RAZORPAY_CLIENT_ID,
-			amount: cart.totalPrice * 100, // Convert to paise
+			amount: amountInPaise, // amount in paise (integer)
 			currency: 'INR',
 			name: 'Rabbit',
 			description: 'Order Payment',
