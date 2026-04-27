@@ -9,9 +9,22 @@ import {
 const CartContent = ({ cart, userId, guestId }) => {
 	const dispatch = useDispatch();
 
+	// Resolve product id from different possible shapes
+	const resolveProductId = (product) =>
+		product.productId || product._id || product.id || '';
+
 	// Handle adding or subtracting to cart
-	const handleToCart = (productId, delta, quantity, size, color) => {
-		const newQuantity = quantity + delta;
+	const handleToCart = (product, delta) => {
+		const productId = resolveProductId(product);
+		const newQuantity = (product.quantity || 0) + delta;
+		const size = product.size;
+		const color = product.color;
+
+		if (!productId) {
+			console.error('Unable to determine product id for cart update', product);
+			return;
+		}
+
 		if (newQuantity >= 1) {
 			dispatch(
 				updateCartItemQuantity({
@@ -22,12 +35,23 @@ const CartContent = ({ cart, userId, guestId }) => {
 					size,
 					color,
 				}),
-			);
+			).catch((err) => console.error('updateCartItemQuantity failed', err));
 		}
 	};
 
-	const handleRemoveFromCart = (productId, size, color) => {
-		dispatch(removeFromCart({ productId, userId, guestId, size, color }));
+	const handleRemoveFromCart = (product) => {
+		const productId = resolveProductId(product);
+		const size = product.size;
+		const color = product.color;
+
+		if (!productId) {
+			console.error('Unable to determine product id for remove', product);
+			return;
+		}
+
+		dispatch(removeFromCart({ productId, userId, guestId, size, color })).catch(
+			(err) => console.error('removeFromCart failed', err),
+		);
 	};
 
 	return (
@@ -50,30 +74,14 @@ const CartContent = ({ cart, userId, guestId }) => {
 							</p>
 							<div className="flex items-center mt-2">
 								<button
-									onClick={() =>
-										handleToCart(
-											product.productId,
-											1,
-											product.quantity,
-											product.size,
-											product.color,
-										)
-									}
+									onClick={() => handleToCart(product, 1)}
 									className="border rounded px-2 py-1 text-xl font-medium"
 								>
 									+
 								</button>
 								<span className="mx-4">{product.quantity}</span>
 								<button
-									onClick={() =>
-										handleToCart(
-											product.productId,
-											-1,
-											product.quantity,
-											product.size,
-											product.color,
-										)
-									}
+									onClick={() => handleToCart(product, -1)}
 									className="border rounded px-2 py-1 text-xl font-medium"
 								>
 									-
@@ -82,16 +90,8 @@ const CartContent = ({ cart, userId, guestId }) => {
 						</div>
 					</div>
 					<div>
-						<p>${(product.price * product.quantity).toFixed(2)}</p>
-						<button
-							onClick={() =>
-								handleRemoveFromCart(
-									product.productId,
-									product.size,
-									product.color,
-								)
-							}
-						>
+						<p>₹{(product.price * product.quantity).toFixed(2)}</p>
+						<button onClick={() => handleRemoveFromCart(product)}>
 							<RiDeleteBin3Line className="h-6 w-6 mt-2 text-red-600" />
 						</button>
 					</div>
