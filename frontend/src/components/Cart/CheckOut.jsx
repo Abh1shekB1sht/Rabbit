@@ -1,17 +1,22 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import UseRazorpay from '../../hooks/UseRazorpay.js';
-import { createOrder } from '../../redux/actions/orderActions.js';
+import { createCheckoutSession } from '../../redux/slices/checkoutSlice.js';
 
 const CheckOut = () => {
 	const navigate = useNavigate();
-	const dipatch = useDispatch();
+	const dispatch = useDispatch();
 	const { cart, loading, error } = useSelector((state) => state.cart);
+	const { checkout, loading: checkoutLoading } = useSelector(
+		(state) => state.checkout,
+	);
+	const { user } = useSelector((state) => state.auth);
 	const [checkoutId, setCheckoutId] = useState(null);
 	const [paymentStatus, setPaymentStatus] = useState(null);
 	const [isProcessing, setIsProcessing] = useState(false);
-	const [paymentDetails, setPaymentDetails] = useState(null);
+	const [checkoutError, setCheckoutError] = useState(null);
 	const [shippingAddress, setShippingAddress] = useState({
 		firstName: '',
 		lastName: '',
@@ -22,30 +27,70 @@ const CheckOut = () => {
 		phone: '',
 	});
 
-	// Ensure cart is loading before proceeding
+	// Ensure cart is loaded before proceeding
 	useEffect(() => {
-		if (!cart || !cart.products || cart.prorducts.length === 0) {
+		if (!cart || !cart.products || cart.products.length === 0) {
 			navigate('/cart');
 		}
 	}, [cart, navigate]);
 
-	const handleCreateCheckout = (e) => {
+	// Derive checkoutId from Redux slice so component stays in sync
+	useEffect(() => {
+		if (checkout && checkout._id) {
+			setCheckoutId(checkout._id);
+		}
+	}, [checkout]);
+
+	const handleCreateCheckout = async (e) => {
 		e.preventDefault();
+		setCheckoutError(null);
+
 		if (cart && cart.products.length > 0) {
-			const res = dispatch(createCheckout({
-				checkoutItems: cart.products,
-				shippingAddress,
-				paymentMethod: 'Razorpay',
-				totalPrice: cart.totalPrice,
-			})
-		);
-		if (res.payload && res.payload._id) {
-			setCheckoutId(res.payload._id);
+			try {
+				const result = await dispatch(
+					createCheckoutSession({
+						checkoutItems: cart.products,
+						shippingAddress,
+						paymentMethod: 'Razorpay',
+						totalPrice: cart.totalPrice,
+					}),
+				);
+
+				if (result.payload && result.payload._id) {
+					setCheckoutId(result.payload._id);
+				} else {
+					setCheckoutError('Failed to create checkout. Please try again.');
+				}
+			} catch (err) {
+				setCheckoutError('Error creating checkout: ' + err.message);
+			}
+		}
+	};
+
+	const handleFinalizeCheckout = async (checkoutIdToFinalize) => {
+		try {
+			const response = await axios.post(
+				`${import.meta.env.VITE_BACKEND_URL}/api/checkout/${checkoutIdToFinalize}/finalize`,
+				{},
+				{
+					headers: {
+						Authorization: `Bearer ${localStorage.getItem('userToken')}`,
+					},
+				},
+			);
+
+			if (response.status === 200) {
+				navigate('/order-confirmation');
+			}
+		} catch (err) {
+			console.error('Error finalizing checkout:', err);
+			setCheckoutError('Failed to finalize order. Please try again.');
 		}
 	};
 
 	const handleRazorpayPayment = async () => {
 		setIsProcessing(true);
+		setCheckoutError(null);
 
 		const { loadScript } = UseRazorpay();
 		const isLoaded = await loadScript();
@@ -57,7 +102,7 @@ const CheckOut = () => {
 
 		const options = {
 			key: import.meta.env.VITE_RAZORPAY_CLIENT_ID,
-			amount: cart.totalPrice * 100,
+			amount: cart.totalPrice * 100, // Convert to paise
 			currency: 'INR',
 			name: 'Rabbit',
 			description: 'Order Payment',
@@ -68,13 +113,38 @@ const CheckOut = () => {
 			theme: {
 				color: '#000000',
 			},
-			handler: function (response) {
-				setPaymentDetails({
-					paymentId: response.razorpay_payment_id,
-				});
-				setPaymentStatus('success');
-				setIsProcessing(false);
-				navigate('/order-confirmation');
+			handler: async (response) => {
+				try {
+					// Update payment status after successful Razorpay payment
+					const paymentResponse = await axios.put(
+						`${import.meta.env.VITE_BACKEND_URL}/api/checkout/${checkoutId}/pay`,
+						{
+							paymentStatus: 'paid',
+							paymentDetails: {
+								paymentId: response.razorpay_payment_id,
+							},
+						},
+						{
+							headers: {
+								Authorization: `Bearer ${localStorage.getItem('userToken')}`,
+							},
+						},
+					);
+
+					if (paymentResponse.status === 200) {
+						setPaymentStatus('success');
+						// Finalize the checkout and create order
+						await handleFinalizeCheckout(checkoutId);
+					}
+				} catch (err) {
+					console.error('Error updating payment status:', err);
+					setCheckoutError(
+						'Payment recorded but order creation failed. Please contact support.',
+					);
+					setPaymentStatus('failed');
+				} finally {
+					setIsProcessing(false);
+				}
 			},
 			modal: {
 				ondismiss: function () {
@@ -88,17 +158,36 @@ const CheckOut = () => {
 		rzp.on('payment.failed', (response) => {
 			console.error('Payment Failed:', response.error);
 			setPaymentStatus('failed');
+			setCheckoutError('Payment failed: ' + response.error.description);
 			setIsProcessing(false);
 		});
 
 		rzp.open();
 	};
 
+	if (loading) {
+		return <p>Loading...</p>;
+	}
+
+	if (error) {
+		return <p>Error: {error}</p>;
+	}
+
+	if (!cart || !cart.products || cart.products.length === 0) {
+		return <p>Your cart is empty</p>;
+	}
+
 	return (
 		<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto py-10 px-6 tracking-tighter">
 			{/* Left Section */}
 			<div className="bg-white rounded-lg p-6">
 				<h2 className="text-2xl uppercase mb-6">Checkout</h2>
+
+				{checkoutError && (
+					<div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
+						{checkoutError}
+					</div>
+				)}
 
 				<form onSubmit={handleCreateCheckout}>
 					{/* ── Contact ── */}
@@ -107,7 +196,7 @@ const CheckOut = () => {
 						<label className="block text-gray-700">Email</label>
 						<input
 							type="email"
-							value="user@example.com"
+							value={user ? user.email : ''}
 							className="w-full p-2 border rounded bg-gray-100"
 							disabled
 						/>
@@ -228,9 +317,12 @@ const CheckOut = () => {
 						{!checkoutId ? (
 							<button
 								type="submit"
-								className="w-full bg-black text-white py-3 rounded hover:bg-gray-800 transition"
+								disabled={loading || checkoutLoading}
+								className="w-full bg-black text-white py-3 rounded hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
 							>
-								Continue to Payment
+								{loading || checkoutLoading
+									? 'Creating Checkout...'
+									: 'Continue to Payment'}
 							</button>
 						) : (
 							<div>
@@ -282,30 +374,32 @@ const CheckOut = () => {
 			<div className="bg-gray-50 p-6 rounded-lg">
 				<h3 className="text-lg mb-4">Order Summary</h3>
 				<div className="border-t py-4 mb-4">
-					{cart.products.map((product, index) => (
-						<div
-							key={index}
-							className="flex items-start justify-between py-2 border-b"
-						>
-							<div className="flex items-start">
-								<img
-									src={product.image}
-									alt={product.name}
-									className="w-20 h-24 object-cover mr-4"
-								/>
+					{cart &&
+						cart.products &&
+						cart.products.map((product, index) => (
+							<div
+								key={index}
+								className="flex items-start justify-between py-2 border-b"
+							>
+								<div className="flex items-start">
+									<img
+										src={product.image}
+										alt={product.name}
+										className="w-20 h-24 object-cover mr-4"
+									/>
+								</div>
+								<div>
+									<h3 className="text-md">{product.name}</h3>
+									<p className="text-gray-500">Size: {product.size} </p>
+									<p className="text-gray-500">Color: {product.color} </p>
+								</div>
+								<p className="text-xl">₹ {product.price?.toLocaleString()}</p>
 							</div>
-							<div>
-								<h3 className="text-md">{product.name}</h3>
-								<p className="text-gray-500">Size: {product.size} </p>
-								<p className="text-gray-500">Color: {product.color} </p>
-							</div>
-							<p className="text-xl">₹ {product.price?.toLocaleString()}</p>
-						</div>
-					))}
+						))}
 				</div>
 				<div className="flex justify-between items-center text-lg mb-4">
 					<p>SubTotal</p>
-					<p>₹ {cart.totalPrice?.toLocaleString()}</p>
+					<p>₹ {cart?.totalPrice?.toLocaleString()}</p>
 				</div>
 				<div className="flex justify-between items-center text-lg">
 					<p>Shipping</p>
@@ -313,7 +407,7 @@ const CheckOut = () => {
 				</div>
 				<div className="flex justify-between items-center text-lg mt-4 border-t pt-4">
 					<p>Total</p>
-					<p>₹ {cart.totalPrice?.toLocaleString()}</p>
+					<p>₹ {cart?.totalPrice?.toLocaleString()}</p>
 				</div>
 			</div>
 		</div>
