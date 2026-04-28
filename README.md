@@ -1,23 +1,31 @@
 # Rabbit
 
-Rabbit is a full-stack fashion e-commerce project built with the MERN stack.
+Rabbit is a full-stack fashion e-commerce platform built with the **MERN** stack, designed to deliver a smooth and responsive online shopping experience.
 
-This started as a learning + real build project: not just a tutorial clone, but a working app with customer flow, admin flow, cart logic, checkout, and order tracking. It is still evolving, but the core experience is already in place.
+It includes a customer shopping flow (browse → cart → checkout → orders) plus an admin dashboard for managing users, products, and orders.
 
-## What this project does
+## Features
 
-- Browse products by collection, category, color, size, brand, material, price range, and search
-- View product details and similar product suggestions
-- Add to cart as guest or logged-in user
-- Merge guest cart into user cart after login
-- Register/login with JWT auth
+### Storefront
+
+- Browse products by **collection, category, color, size, brand, material, price range**, and search
+- Product details page with similar product suggestions
+- Shopping cart for **guests and logged-in users**
+- **Guest cart → user cart merge** after login
+- JWT-based authentication (register/login)
 - Checkout flow with payment status + order finalization
-- View user orders (list + details)
+- User order history (list + details)
+
+### Admin
+
 - Admin dashboard for:
   - user management
   - product management
   - order management
-- Product image upload via Cloudinary
+
+### Media & misc
+
+- Product image upload via **Cloudinary**
 - Newsletter subscribe endpoint
 
 ## Tech stack
@@ -52,8 +60,8 @@ rabbit/
 ### 1) Clone and install
 
 ```bash
-git clone <your-repo-url>
-cd rabbit
+git clone https://github.com/Abh1shekB1sht/Rabbit.git
+cd Rabbit
 
 cd backend
 npm install
@@ -164,14 +172,12 @@ Implemented:
 - Checkout-to-order conversion
 - Guest-to-user cart migration
 
-In progress / planned polish:
+Planned / polish:
 
 - tighter validation and error states
 - stronger automated test coverage
 - deployment hardening and environment automation
 
-## Why this repo exists
+## License
 
-This project is my practical sandbox to understand real e-commerce behavior: auth edge cases, cart merge logic, checkout states, and admin workflows.
-
-If you're reviewing or using this code, feedback is always welcome.
+No license specified yet. If you plan to open-source this, consider adding an MIT/Apache-2.0 license.
