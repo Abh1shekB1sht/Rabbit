@@ -2,6 +2,8 @@
 
 Rabbit is a full-stack fashion e-commerce platform built with the **MERN** stack, designed to deliver a smooth and responsive online shopping experience.
 
+This project started as a **learning / understanding build**—a practical way to improve my knowledge of how a bigger real-world application is structured, and how smaller modules (auth, products, cart, checkout, admin, etc.) integrate together to work as one complete system.
+
 It includes a customer shopping flow (browse → cart → checkout → orders) plus an admin dashboard for managing users, products, and orders.
 
 ## Features
