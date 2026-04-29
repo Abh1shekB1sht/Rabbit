@@ -133,7 +133,7 @@ router.put('/:id', protect, admin, async (req, res) => {
 // @route DELETE /api/products/:id
 // @desc Delete a product from the database
 // @access Private (Admin)
-router.delete('/:id', protect, admin, async (req, res) => {
+router.delete('/:id', protect, async (req, res) => {
 	try {
 		// Find product by ID
 		const product = await Product.findById(req.params.id);
