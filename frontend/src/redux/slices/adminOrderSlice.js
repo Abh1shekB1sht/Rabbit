@@ -2,7 +2,12 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 const API_URL = `${import.meta.env.VITE_BACKEND_URL}`;
-const USER_TOKEN = `Bearer ${localStorage.getItem('userToken')}`;
+
+const getAuthHeaders = () => {
+	const token = localStorage.getItem('userToken');
+
+	return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 // Fetch all orders (admin only)
 export const fetchAdminOrders = createAsyncThunk(
@@ -10,13 +15,13 @@ export const fetchAdminOrders = createAsyncThunk(
 	async (_, { rejectWithValue }) => {
 		try {
 			const response = await axios.get(`${API_URL}/api/admin/orders`, {
-				headers: {
-					Authorization: USER_TOKEN,
-				},
+				headers: getAuthHeaders(),
 			});
 			return response.data;
 		} catch (error) {
-			return rejectWithValue(error.response.data);
+			return rejectWithValue(
+				error.response?.data || { message: 'Failed to fetch orders' },
+			);
 		}
 	},
 );
@@ -30,14 +35,14 @@ export const updateOrderStatus = createAsyncThunk(
 				`${API_URL}/api/admin/orders/${orderId}`,
 				{ status },
 				{
-					headers: {
-						Authorization: USER_TOKEN,
-					},
+					headers: getAuthHeaders(),
 				},
 			);
 			return response.data;
 		} catch (error) {
-			return rejectWithValue(error.response.data);
+			return rejectWithValue(
+				error.response?.data || { message: 'Failed to update order' },
+			);
 		}
 	},
 );
@@ -50,14 +55,14 @@ export const deleteOrderStatus = createAsyncThunk(
 			const response = await axios.delete(
 				`${API_URL}/api/admin/orders/${orderId}`,
 				{
-					headers: {
-						Authorization: USER_TOKEN,
-					},
+					headers: getAuthHeaders(),
 				},
 			);
 			return response.data;
 		} catch (error) {
-			return rejectWithValue(error.response.data);
+			return rejectWithValue(
+				error.response?.data || { message: 'Failed to delete order' },
+			);
 		}
 	},
 );
