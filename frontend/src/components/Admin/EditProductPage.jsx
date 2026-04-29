@@ -1,7 +1,24 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
+import {
+	fetchProductDetails,
+	updateProduct,
+} from '../../redux/slices/productSlice';
 
 const EditProductPage = () => {
-	const [productData, setProductData] = useState({
+	const dispatch = useDispatch();
+	const navigate = useNavigate();
+	const { id } = useParams();
+
+	const [uploading, setUploading] = useState(false);
+
+	const { selectedProduct, loading, error } = useSelector(
+		(state) => state.products,
+	);
+
+	const defaultProductData = {
 		name: '',
 		description: '',
 		price: 0,
@@ -14,30 +31,75 @@ const EditProductPage = () => {
 		collections: '',
 		material: '',
 		gender: '',
-		images: [
-			{
-				url: 'https://picsum.photos/150?random=1',
-			},
-			{
-				url: 'https://picsum.photos/150?random=2',
-			},
-		],
-	});
+		images: [],
+	};
+
+	const [productData, setProductData] = useState(null);
+
+	const formData = productData || selectedProduct || defaultProductData;
+
+	useEffect(() => {
+		if (id) {
+			dispatch(fetchProductDetails(id));
+		}
+	}, [dispatch, id]);
 
 	const handleChange = (e) => {
 		const { name, value } = e.target;
-		setProductData((prevData) => ({ ...prevData, [name]: value }));
+		setProductData((prevData) => ({
+			...(prevData || formData),
+			[name]: value,
+		}));
 	};
 
 	const handleImageUpload = async (e) => {
 		const file = e.target.files[0];
-		console.log(file);
+		const uploadFormData = new FormData();
+		uploadFormData.append('image', file);
+		try {
+			setUploading(true);
+			const { data } = await axios.post(
+				`${import.meta.env.VITE_BACKEND_URL}/api/upload`,
+				uploadFormData,
+				{
+					headers: {
+						'Content-Type': 'multipart/form-data',
+					},
+				},
+			);
+			setProductData((prevData) => ({
+				...(prevData || formData),
+				images: [
+					...(prevData?.images || formData.images || []),
+					{ url: data.imageUrl, altText: file.name },
+				],
+			}));
+			setUploading(false);
+		} catch (error) {
+			console.error(error);
+			setUploading(false);
+		}
 	};
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		console.log(productData);
+		dispatch(updateProduct({ id, productData: formData }))
+			.unwrap()
+			.then(() => {
+				navigate('/admin/products');
+			})
+			.catch((err) => {
+				console.error(err);
+			});
 	};
+
+	if (loading) {
+		return <p>Loading...</p>;
+	}
+
+	if (error) {
+		return <p className="text-red-500 font-bold">Error: {error}</p>;
+	}
 
 	return (
 		<div className="max-w-5xl mx-auto p-6 shadow-md rounded-md">
@@ -49,7 +111,7 @@ const EditProductPage = () => {
 					<input
 						type="text"
 						name="name"
-						value={productData.name}
+						value={formData.name}
 						onChange={handleChange}
 						className="w-full border border-gray-300 rounded-md p-2"
 						required
@@ -64,7 +126,7 @@ const EditProductPage = () => {
 					<textarea
 						type="text"
 						name="description"
-						value={productData.description}
+						value={formData.description}
 						onChange={handleChange}
 						className="w-full border border-gray-300 rounded-md p-2"
 						rows={4}
@@ -78,7 +140,7 @@ const EditProductPage = () => {
 					<input
 						type="number"
 						name="price"
-						value={productData.price}
+						value={formData.price}
 						onChange={handleChange}
 						className="w-full border-gray-300 rounded-md p-2"
 					/>
@@ -90,7 +152,7 @@ const EditProductPage = () => {
 					<input
 						type="number"
 						name="countInStock"
-						value={productData.countInStock}
+						value={formData.countInStock}
 						onChange={handleChange}
 						className="w-full border-gray-300 rounded-md p-2"
 					/>
@@ -102,7 +164,7 @@ const EditProductPage = () => {
 					<input
 						type="text"
 						name="sku"
-						value={productData.sku}
+						value={formData.sku}
 						onChange={handleChange}
 						className="w-full border border-gray-300 rounded-md p-2"
 						required
@@ -117,10 +179,10 @@ const EditProductPage = () => {
 					<input
 						type="text"
 						name="sizes"
-						value={productData.sizes.join(',')}
+						value={(formData.sizes || []).join(',')}
 						onChange={(e) =>
 							setProductData({
-								...productData,
+								...(productData || formData),
 								sizes: e.target.value.split(',').map((size) => size.trim()),
 							})
 						}
@@ -137,10 +199,10 @@ const EditProductPage = () => {
 					<input
 						type="text"
 						name="colors"
-						value={productData.colors.join(',')}
+						value={(formData.colors || []).join(',')}
 						onChange={(e) =>
 							setProductData({
-								...productData,
+								...(productData || formData),
 								colors: e.target.value.split(',').map((color) => color.trim()),
 							})
 						}
@@ -153,8 +215,9 @@ const EditProductPage = () => {
 				<div className="mb-6">
 					<label className="block font-semibold mb-2">Upload Image</label>
 					<input type="file" onChange={handleImageUpload} />
+					{uploading && <p>Uploading image...</p>}
 					<div className="flex gap-4 mt-4">
-						{productData.images.map((image, index) => (
+						{(formData.images || []).map((image, index) => (
 							<div key={index}>
 								<img
 									src={image.url}
