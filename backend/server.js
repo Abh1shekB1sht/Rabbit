@@ -20,7 +20,9 @@ app.use(express.json());
 dotenv.config();
 
 // Connect To MongoDB
-connectDB();
+connectDB().catch((error) => {
+	console.error('Initial MongoDB connection failed:', error.message);
+});
 
 app.get('/', (req, res) => {
 	res.send('Hello from the backend!');
@@ -43,7 +45,9 @@ app.use('/api/admin/orders', adminOrderRoutes);
 // Export for Vercel
 module.exports = app;
 
-const PORT = process.env.PORT || 9000;
-app.listen(PORT, () => {
-	console.log(`Server is running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+	const PORT = process.env.PORT || 9000;
+	app.listen(PORT, () => {
+		console.log(`Server is running on port ${PORT}`);
+	});
+}
