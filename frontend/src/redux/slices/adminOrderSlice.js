@@ -90,22 +90,39 @@ const adminOrderSlice = createSlice({
 			})
 			.addCase(fetchAdminOrders.rejected, (state, action) => {
 				state.loading = false;
-				state.error = action.payload.message;
+				state.error = action.payload?.message || action.error.message;
+			})
+			.addCase(updateOrderStatus.pending, (state) => {
+				state.loading = true;
+				state.error = null;
 			})
 			.addCase(updateOrderStatus.fulfilled, (state, action) => {
 				state.loading = false;
+				const updatedOrder = action.payload.order;
 				const index = state.orders.findIndex(
-					(order) => order._id === action.payload._id,
+					(order) => order._id === updatedOrder._id,
 				);
 				if (index !== -1) {
-					state.orders[index] = action.payload;
+					state.orders[index] = updatedOrder;
 				}
+			})
+			.addCase(updateOrderStatus.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload?.message || action.error.message;
+			})
+			.addCase(deleteOrderStatus.pending, (state) => {
+				state.loading = true;
+				state.error = null;
 			})
 			.addCase(deleteOrderStatus.fulfilled, (state, action) => {
 				state.loading = false;
 				state.orders = state.orders.filter(
-					(order) => order._id !== action.payload._id,
+					(order) => order._id !== action.meta.arg.orderId,
 				);
+			})
+			.addCase(deleteOrderStatus.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload?.message || action.error.message;
 			});
 	},
 });
