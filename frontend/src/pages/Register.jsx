@@ -87,7 +87,7 @@ const Register = () => {
 						disabled={loading}
 						className="w-full bg-black text-white p-2 rounded-lg font-semibold hover:bg-gray-800 transition duration-200"
 					>
-						{loading ? 'Signing Up...' : 'Sign Up'}
+						{loading ? 'loading...' : 'Sign Up'}
 					</button>
 					{error && (
 						<p className="mt-3 text-sm text-red-600 text-center">{error}</p>
