@@ -20,6 +20,7 @@ import Profile from './pages/Profile';
 import Register from './pages/Register';
 
 import { Provider } from 'react-redux';
+import ProtectedRoute from './components/Common/ProtectedRoute';
 import store from './redux/store';
 
 const App = () => {
@@ -43,7 +44,14 @@ const App = () => {
 						<Route path="/order/:id" element={<OrderDetailsPage />} />
 						<Route path="/my-orders" element={<MyOrdersPage />} />
 					</Route>
-					<Route path="/admin" element={<AdminLayout />}>
+					<Route
+						path="/admin"
+						element={
+							<ProtectedRoute role="admin">
+								<AdminLayout />
+							</ProtectedRoute>
+						}
+					>
 						<Route index element={<AdminHomePage />} />
 						<Route path="users" element={<UserManagement />} />
 						<Route path="products" element={<ProductManagement />} />
