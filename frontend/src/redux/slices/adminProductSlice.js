@@ -2,18 +2,27 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 const API_URL = `${import.meta.env.VITE_BACKEND_URL}`;
-const USER_TOKEN = `Bearer ${localStorage.getItem('userToken')}`;
+
+const getAuthHeaders = () => {
+	const token = localStorage.getItem('userToken');
+
+	return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 // Async thunk to fetch admin products
 export const fetchAdminProducts = createAsyncThunk(
 	'adminProducts/fetchAdminProducts',
-	async () => {
-		const response = await axios.get(`${API_URL}/api/admin/products`, {
-			headers: {
-				Authorization: USER_TOKEN,
-			},
-		});
-		return response.data;
+	async (_, { rejectWithValue }) => {
+		try {
+			const response = await axios.get(`${API_URL}/api/admin/products`, {
+				headers: getAuthHeaders(),
+			});
+			return response.data;
+		} catch (error) {
+			return rejectWithValue(
+				error.response?.data || { message: 'Failed to fetch products' },
+			);
+		}
 	},
 );
 
@@ -26,9 +35,7 @@ export const createAdminProduct = createAsyncThunk(
 				`${API_URL}/api/admin/products`,
 				productData,
 				{
-					headers: {
-						Authorization: USER_TOKEN,
-					},
+					headers: getAuthHeaders(),
 				},
 			);
 			return response.data;
@@ -49,9 +56,7 @@ export const updateAdminProduct = createAsyncThunk(
 				`${API_URL}/api/admin/products/${productId}`,
 				productData,
 				{
-					headers: {
-						Authorization: USER_TOKEN,
-					},
+					headers: getAuthHeaders(),
 				},
 			);
 			return response.data;
@@ -71,9 +76,7 @@ export const deleteAdminProduct = createAsyncThunk(
 			const response = await axios.delete(
 				`${API_URL}/api/admin/products/${productId}`,
 				{
-					headers: {
-						Authorization: USER_TOKEN,
-					},
+					headers: getAuthHeaders(),
 				},
 			);
 			return response.data;
