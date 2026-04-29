@@ -53,17 +53,23 @@ export const fetchProductDetails = createAsyncThunk(
 // Async Thunk to fetch similar product
 export const updateProduct = createAsyncThunk(
 	'product/updateProduct',
-	async ({ id, productData }) => {
-		const response = await axios.get(
-			`${import.meta.env.VITE_BACKEND_URL}/api/products/${id}`,
-			productData,
-			{
-				headers: {
-					Authorization: `Bearer ${localStorage.getItem('userToken')}`,
+	async ({ id, productData }, { rejectWithValue }) => {
+		try {
+			const response = await axios.put(
+				`${import.meta.env.VITE_BACKEND_URL}/api/products/${id}`,
+				productData,
+				{
+					headers: {
+						Authorization: `Bearer ${localStorage.getItem('userToken')}`,
+					},
 				},
-			},
-		);
-		return response.data;
+			);
+			return response.data;
+		} catch (error) {
+			return rejectWithValue(
+				error.response?.data || { message: 'Failed to update product' },
+			);
+		}
 	},
 );
 
