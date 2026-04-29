@@ -40,7 +40,13 @@ app.use('/api/admin/users', adminRoutes);
 app.use('/api/admin/products', productAdminRoutes);
 app.use('/api/admin/orders', adminOrderRoutes);
 
-const PORT = process.env.PORT || 9000;
-app.listen(PORT, () => {
-	console.log(`Server is running on port ${PORT}`);
-});
+// Export for Vercel
+module.exports = app;
+
+// Only listen on port in development (local testing)
+if (process.env.NODE_ENV !== 'production') {
+	const PORT = process.env.PORT || 9000;
+	app.listen(PORT, () => {
+		console.log(`Server is running on port ${PORT}`);
+	});
+}
