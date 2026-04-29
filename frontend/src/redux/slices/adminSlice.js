@@ -75,7 +75,7 @@ export const deleteUser = createAsyncThunk('admin/deleteUser', async (id) => {
 const adminSlice = createSlice({
 	name: 'admin',
 	initialState: {
-		user: [],
+		users: [],
 		loading: false,
 		error: null,
 	},
@@ -95,16 +95,17 @@ const adminSlice = createSlice({
 				state.error = action.error.message;
 			})
 			.addCase(updateUser.fulfilled, (state, action) => {
-				const updatedUser = action.payload;
-				const userIndex = state.user.findIndex(
+				const updatedUser = action.payload.user;
+				const userIndex = state.users.findIndex(
 					(user) => user._id === updatedUser._id,
 				);
 				if (userIndex !== -1) {
-					state.user[userIndex] = updatedUser;
+					state.users[userIndex] = updatedUser;
 				}
 			})
 			.addCase(deleteUser.fulfilled, (state, action) => {
-				state.user = state.user.filter((user) => user._id !== action.payload);
+				const deletedUserId = action.payload?.userId || action.meta.arg;
+				state.users = state.users.filter((user) => user._id !== deletedUserId);
 			})
 			.addCase(addUser.pending, (state) => {
 				state.loading = true;
@@ -112,11 +113,11 @@ const adminSlice = createSlice({
 			})
 			.addCase(addUser.fulfilled, (state, action) => {
 				state.loading = false;
-				state.users.push(action.payload);
+				state.users.push(action.payload.user);
 			})
 			.addCase(addUser.rejected, (state, action) => {
-				state.loading = true;
-				state.error = action.error.message;
+				state.loading = false;
+				state.error = action.payload?.message || action.error.message;
 			});
 	},
 });
