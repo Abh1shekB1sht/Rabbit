@@ -6,7 +6,7 @@
 			"headers": [
 				{
 					"key": "Access-Control-Allow-Origin",
-					"value": "https://rabbit-vskk-kpfqfgvbe-abh1shekb1shts-projects.vercel.app"
+					"value": "https://rabbit-vskk.vercel.app"
 				},
 				{
 					"key": "Access-Control-Allow-Methods",
